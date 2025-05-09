@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple SQL Editor</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app" class="container">
+        <h1>Simple SQL Editor</h1>
+        
+        <div class="sql-editor">
+            <textarea 
+                v-model="sqlQuery" 
+                class="sql-input" 
+                placeholder="SQLクエリを入力してください..."
+            ></textarea>
+            <button 
+                @click="executeQuery" 
+                class="execute-button"
+                :disabled="isLoading"
+            >
+                {{ isLoading ? '実行中...' : '実行' }}
+            </button>
+        </div>
+
+        <div class="results">
+            <div v-if="error" class="error">{{ error }}</div>
+            <div v-else-if="!results.length" class="no-results">結果がありません。</div>
+            <table v-else class="results-table">
+                <thead>
+                    <tr>
+                        <th v-for="header in tableHeaders" :key="header">{{ header }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(row, index) in results" :key="index">
+                        <td v-for="header in tableHeaders" :key="header">
+                            {{ row[header] }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html> 
