@@ -2,6 +2,7 @@ package com.simple.sql.editor.controller;
 
 import com.simple.sql.editor.service.SqlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -15,55 +16,47 @@ public class SqlController {
     private SqlService sqlService;
 
     @PostMapping("/execute")
-    public Map<String, Object> executeQuery(@RequestBody Map<String, String> request) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<?> executeQuery(@RequestBody Map<String, String> request) {
         try {
             String sql = request.get("sql");
-            if (sql == null) {
-                response.put("error", "クエリが指定されていません。");
-                return response;
+            if (sql == null || sql.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "クエリが指定されていません。"));
             }
-            
-            List<Map<String, Object>> results = sqlService.executeQuery(sql);
-            response.put("results", results);
-        } catch (IllegalArgumentException e) {
-            response.put("error", e.getMessage());
+
+            // クエリの実行と履歴の保存
+            Map<String, Object> result = sqlService.executeQueryAndSaveHistory(sql);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            response.put("error", "クエリの実行中にエラーが発生しました: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-        return response;
     }
 
     @PostMapping("/plan")
-    public Map<String, Object> getExecutionPlan(@RequestBody Map<String, String> request) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<?> getExecutionPlan(@RequestBody Map<String, String> request) {
         try {
             String sql = request.get("sql");
-            if (sql == null) {
-                response.put("error", "クエリが指定されていません。");
-                return response;
+            if (sql == null || sql.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "クエリが指定されていません。"));
             }
 
-            if (!sql.trim().toLowerCase().startsWith("select")) {
-                response.put("error", "実行計画はSELECT文のみ取得可能です");
-                return response;
+            if (!sql.trim().toUpperCase().startsWith("SELECT")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "実行計画はSELECT文のみ使用できます。"));
             }
 
-            List<Map<String, Object>> planResults = sqlService.executeQuery("EXPLAIN QUERY PLAN " + sql);
-            StringBuilder planBuilder = new StringBuilder();
-            for (Map<String, Object> row : planResults) {
-                planBuilder.append(row.values().stream()
-                    .map(Object::toString)
-                    .reduce((a, b) -> a + " | " + b)
-                    .orElse(""));
-                planBuilder.append("\n");
-            }
-            response.put("plan", planBuilder.toString().trim());
-        } catch (IllegalArgumentException e) {
-            response.put("error", e.getMessage());
+            String plan = sqlService.getExecutionPlan(sql);
+            return ResponseEntity.ok(Map.of("plan", plan));
         } catch (Exception e) {
-            response.put("error", "実行計画の取得中にエラーが発生しました: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-        return response;
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<?> getQueryHistory() {
+        try {
+            List<Map<String, Object>> history = sqlService.getQueryHistory();
+            return ResponseEntity.ok(Map.of("history", history));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 } 

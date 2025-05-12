@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.simple.sql.editor.mapper.SqlMapper">
+    
+    <select id="executeQuery" resultType="map">
+        ${sql}
+    </select>
+
+    <select id="getQueryHistory" resultType="map">
+        SELECT 
+            id,
+            sql_query,
+            execution_time,
+            execution_status,
+            error_message,
+            execution_duration,
+            created_at,
+            updated_at
+        FROM t_query_history
+        ORDER BY execution_time DESC
+        LIMIT 100
+    </select>
+
+    <insert id="saveQueryHistory">
+        INSERT INTO t_query_history (
+            sql_query,
+            execution_time,
+            execution_status,
+            error_message,
+            execution_duration,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{sql},
+            CURRENT_TIMESTAMP,
+            #{status},
+            #{errorMessage},
+            #{duration},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+</mapper> 

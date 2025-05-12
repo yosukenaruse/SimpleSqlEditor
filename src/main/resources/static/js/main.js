@@ -8,7 +8,8 @@ createApp({
             tableHeaders: [],
             error: null,
             isLoading: false,
-            executionPlan: null
+            executionPlan: null,
+            queryHistory: null
         }
     },
     methods: {
@@ -80,6 +81,7 @@ createApp({
             this.results = [];
             this.tableHeaders = [];
             this.executionPlan = null;
+            this.queryHistory = null;
 
             try {
                 const response = await fetch('/api/sql/execute', {
@@ -124,6 +126,7 @@ createApp({
             this.results = [];
             this.tableHeaders = [];
             this.executionPlan = null;
+            this.queryHistory = null;
 
             try {
                 const response = await fetch('/api/sql/plan', {
@@ -145,6 +148,42 @@ createApp({
             } finally {
                 this.isLoading = false;
             }
+        },
+        async showQueryHistory() {
+            this.isLoading = true;
+            this.error = null;
+            this.results = [];
+            this.tableHeaders = [];
+            this.executionPlan = null;
+            this.queryHistory = null;
+
+            try {
+                const response = await fetch('/api/sql/history');
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                this.queryHistory = data.history;
+            } catch (error) {
+                this.error = error.message;
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        loadQuery(query) {
+            this.sqlQuery = query;
+        },
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
         }
     }
 }).mount('#app'); 

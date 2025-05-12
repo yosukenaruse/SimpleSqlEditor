@@ -33,15 +33,43 @@
                 >
                     {{ isLoading ? '実行中...' : '実行計画' }}
                 </button>
+                <button 
+                    @click="showQueryHistory" 
+                    class="history-button"
+                    :disabled="isLoading"
+                >
+                    履歴
+                </button>
             </div>
         </div>
 
         <div class="results">
             <div v-if="error" class="error">{{ error }}</div>
-            <div v-else-if="!results.length && !executionPlan" class="no-results">結果がありません。</div>
+            <div v-else-if="!results.length && !executionPlan && !queryHistory" class="no-results">結果がありません。</div>
             <div v-else-if="executionPlan" class="execution-plan">
                 <h3>実行計画</h3>
                 <pre>{{ executionPlan }}</pre>
+            </div>
+            <div v-else-if="queryHistory" class="query-history">
+                <h3>クエリ履歴</h3>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>実行時刻</th>
+                            <th>クエリ</th>
+                            <th>ステータス</th>
+                            <th>実行時間</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in queryHistory" :key="item.id" @click="loadQuery(item.sql_query)" class="history-row">
+                            <td>{{ formatDate(item.execution_time) }}</td>
+                            <td class="query-cell">{{ item.sql_query }}</td>
+                            <td :class="item.execution_status.toLowerCase()">{{ item.execution_status }}</td>
+                            <td>{{ item.execution_duration }}ms</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <table v-else class="results-table">
                 <thead>
