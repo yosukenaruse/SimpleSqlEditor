@@ -19,10 +19,17 @@ public class SqlController {
         Map<String, Object> response = new HashMap<>();
         try {
             String query = request.get("query");
+            if (query == null) {
+                response.put("error", "クエリが指定されていません。");
+                return response;
+            }
+            
             List<Map<String, Object>> results = sqlService.executeQuery(query);
             response.put("results", results);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             response.put("error", e.getMessage());
+        } catch (Exception e) {
+            response.put("error", "クエリの実行中にエラーが発生しました: " + e.getMessage());
         }
         return response;
     }
