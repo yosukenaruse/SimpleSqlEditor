@@ -33,20 +33,39 @@ h1 {
     margin-bottom: 10px;
 }
 
-.execute-button {
-    background-color: #4CAF50;
-    color: white;
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.execute-button, .plan-button {
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
+}
+
+.execute-button {
+    background-color: #4CAF50;
+    color: white;
 }
 
 .execute-button:hover {
     background-color: #45a049;
 }
 
-.execute-button:disabled {
+.plan-button {
+    background-color: #2196F3;
+    color: white;
+}
+
+.plan-button:hover {
+    background-color: #1976D2;
+}
+
+.execute-button:disabled, .plan-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
 }
@@ -92,4 +111,26 @@ h1 {
 
 .results-table tr:hover {
     background-color: #f9f9f9;
+}
+
+.execution-plan {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.execution-plan h3 {
+    margin-top: 0;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.execution-plan pre {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
 } 
