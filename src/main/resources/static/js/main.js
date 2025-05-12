@@ -62,12 +62,24 @@ createApp({
             return null;
         },
         async executeQuery() {
-            console.log('XXXXXX');
-            this.isLoading = true
-            this.error = null
-            this.results = []
-            this.tableHeaders = []
-            this.executionPlan = null
+            const query = this.getSelectedQuery();
+            if (!query) {
+                this.error = 'SQLクエリを入力してください。';
+                return;
+            }
+
+            // クエリのバリデーション
+            const validationError = this.validateQuery(query);
+            if (validationError) {
+                this.error = validationError;
+                return;
+            }
+
+            this.isLoading = true;
+            this.error = null;
+            this.results = [];
+            this.tableHeaders = [];
+            this.executionPlan = null;
 
             try {
                 const response = await fetch('/api/sql/execute', {
@@ -75,54 +87,63 @@ createApp({
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ sql: this.sqlQuery })
-                })
+                    body: JSON.stringify({ sql: query })
+                });
 
-                const data = await response.json()
-                if (!response.ok) {
-                    throw new Error(data.message || 'エラーが発生しました')
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
                 }
-                console.log(data);
+
                 if (data.results && data.results.length > 0) {
-                    this.results = data.results
-                    this.tableHeaders = Object.keys(data.results[0])
+                    this.results = data.results;
+                    this.tableHeaders = Object.keys(data.results[0]);
                 }
             } catch (error) {
-                this.error = error.message
-                console.log(3333333);
-                console.log(error.message);
+                this.error = error.message;
             } finally {
-                this.isLoading = false
+                this.isLoading = false;
             }
         },
         async showExecutionPlan() {
-            this.isLoading = true
-            this.error = null
-            this.results = []
-            this.tableHeaders = []
-            this.executionPlan = null
-            console.log(555555);
+            const query = this.getSelectedQuery();
+            if (!query) {
+                this.error = 'SQLクエリを入力してください。';
+                return;
+            }
+
+            // クエリのバリデーション
+            const validationError = this.validateQuery(query);
+            if (validationError) {
+                this.error = validationError;
+                return;
+            }
+
+            this.isLoading = true;
+            this.error = null;
+            this.results = [];
+            this.tableHeaders = [];
+            this.executionPlan = null;
+
             try {
                 const response = await fetch('/api/sql/plan', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ sql: this.sqlQuery })
-                })
+                    body: JSON.stringify({ sql: query })
+                });
 
-                const data = await response.json()
-                console.log(data);
-                if (!response.ok) {
-                    throw new Error(data.message || 'エラーが発生しました')
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
                 }
 
-                this.executionPlan = data.plan
+                this.executionPlan = data.plan;
             } catch (error) {
-                this.error = error.message
-                console.log(error);
+                this.error = error.message;
             } finally {
-                this.isLoading = false
+                this.isLoading = false;
             }
         }
     }
